@@ -1,0 +1,110 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.3rem;
+
+  // label && input
+  label {
+    margin: .4rem 0;
+    color: $light_color;
+    display: flex;
+    flex-direction: column;
+    
+    span {
+      transform: translate(25px, -40px);
+      pointer-events: none;
+      display: inline-block;
+      width: fit-content;
+      color: rgba($color: $light_color, $alpha: .6);
+      transition: all .1s ease;
+      font-weight: 600;
+    }
+    
+    input {
+      padding: 14px 24px 16px;
+      border: 2px solid $light_color;
+      border-radius: 10px;
+      background-color: transparent;
+      font-size: 1.3rem;
+      outline: none;
+      color: $light_color;
+      
+      &::placeholder {
+        color: $light_color;
+        display: block;
+      }
+    }
+    
+    // label when input has value
+    &:focus-within > span, & > input:not(:placeholder-shown) + span {
+      transform: translate(10px, -69px);
+      background-color: $off_light_color;
+      padding: 0 6px;
+      color: rgba($color: $light_color, $alpha: 1);
+    }
+  }
+
+  div.error {
+    transform: translate(85%, -74px);
+    position: relative;
+    color: $light_color;
+
+  span:nth-child(1) {
+    position: absolute;
+    display: inline-block;
+    width: fit-content;
+    padding: 5px 13px;
+    background-color: $light_color;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    color: $off_light_color;
+    cursor: help;
+
+    &:hover + span:nth-child(2) {
+      display: initial;
+      animation: opacity_in .1s ease;
+    }
+  }
+
+    span:nth-child(2) {
+      position: absolute;
+      display: none;
+      position: absolute;
+      background-color: $light_color;
+      color: $base_color;
+      padding: 10px 25px;
+      border-radius: 9px 9px 0 9px;
+      transform-origin: top left;
+      transform: translate(-95%, -110%);
+      box-shadow: 3px 3px 3px rgba($color: $base_color, $alpha: .2);
+    }
+
+  }
+  
+  button {
+    margin: 21px 0;
+    background-color: transparent;
+    padding: 14px 24px;
+    border: 2px solid $light_color;
+    border-radius: 10px;
+    color: $light_color;
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all .1s ease;
+
+    &:hover {
+      background-color: $base_color;
+      border-color: $off_light_color;
+      color: $light_color;
+    }
+  }
+}
+
+@keyframes opacity_in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
