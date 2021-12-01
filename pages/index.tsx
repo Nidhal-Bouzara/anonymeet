@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react'
-import type { NextPage } from 'next'
-import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
+
+// form imports
 import * as yup from 'yup'
+import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup'
+
+// next imports
+import type { NextPage } from 'next'
+import { signIn } from 'next-auth/react'
+import Router from 'next/router'
 
 // styles
 import sheet from '../styles/index.module.scss'
@@ -12,8 +19,10 @@ const validationSchema = yup.object({
   password: yup.string().required("This field is required").min(5, "Password must be at least 5 characters"),
 }).required()
 
-// type FormValues = yup.InferType<typeof validationSchema>
-type FormValues= any
+interface FormValues {
+  name: string
+  password: string
+}
 
 const Home: NextPage = () => {
   const {register, formState: { errors, isSubmitting }, handleSubmit} = useForm<FormValues>({ resolver: yupResolver(validationSchema) })
@@ -22,12 +31,17 @@ const Home: NextPage = () => {
     if (isSubmitting !== IsFormSubmitting) setIsFormSubmitting(isSubmitting)
   }, [isSubmitting, IsFormSubmitting])
   const handleFormSubmit = async (values: FormValues) => {
-    await new Promise((res, rej) => {
-      setTimeout(() => {
-        alert(JSON.stringify(values))
-        res(null)
-      }, 2000);
-    })
+    try {
+      const res = (await signIn('credentials', { ...values, redirect: false })) as any
+      console.log('this is res: ', res);
+      
+      if (!res.ok) toast.error('ERROR: This user does not exist in our records.')
+      else {
+        toast.success('SUCCESS: Redirecting.')
+        Router.push('/chat')
+      }
+    } catch (e) {
+    }
   }
   
   return (
