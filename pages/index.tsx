@@ -7,20 +7,22 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup'
 
 // next imports
-import type { NextPage } from 'next'
-import { signIn } from 'next-auth/react'
+import type { GetServerSideProps, GetServerSidePropsResult, NextPage } from 'next'
+import { getSession, signIn } from 'next-auth/react'
 import Router from 'next/router'
 
 // styles
-import sheet from '../styles/index.module.scss'
+import sheet from '@styles/pages/index.module.scss'
+import { authOrRedirect } from 'utils/authenticate'
+import _ from 'lodash'
 
 const validationSchema = yup.object({
-  name: yup.string().required("This field is required"),
+  username: yup.string().required("This field is required"),
   password: yup.string().required("This field is required").min(5, "Password must be at least 5 characters"),
 }).required()
 
 interface FormValues {
-  name: string
+  username: string
   password: string
 }
 
@@ -30,17 +32,18 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (isSubmitting !== IsFormSubmitting) setIsFormSubmitting(isSubmitting)
   }, [isSubmitting, IsFormSubmitting])
+  
   const handleFormSubmit = async (values: FormValues) => {
     try {
       const res = (await signIn('credentials', { ...values, redirect: false })) as any
-      console.log('this is res: ', res);
-      
       if (!res.ok) toast.error('ERROR: This user does not exist in our records.')
       else {
         toast.success('SUCCESS: Redirecting.')
+        setIsFormSubmitting(true)
         Router.push('/chat')
       }
     } catch (e) {
+      toast.error(`ERROR: Unexpected error occured, please try again.`)
     }
   }
   
@@ -51,10 +54,10 @@ const Home: NextPage = () => {
           <h2 className={sheet.title}>Log In</h2>
           <form className={sheet.form} onSubmit={handleSubmit(handleFormSubmit)}>
             <label>
-              <input type="text" placeholder=" " {...register('name', { required: "This field is required" })} />
+              <input type="text" placeholder=" " {...register('username', { required: "This field is required" })} />
               <span>User Name</span>
             </label>
-            { errors.name && <div className={sheet.error}><span>!</span><span>{ errors.name.message }</span></div> }
+            { errors.username && <div className={sheet.error}><span>!</span><span>{ errors.username.message }</span></div> }
             <label>
               <input type="password" placeholder=" " {...register('password', { required: "This field is required", minLength: { value: 5, message: "Minimum password length is 5" } })} />
               <span>Password</span>
@@ -66,6 +69,12 @@ const Home: NextPage = () => {
       </div>
     </main>
   )
+}
+
+export const getServerSideProps: GetServerSideProps<{}> = async (ctx) => {
+  const session = await getSession(ctx)
+  if (!_.isEmpty(session)) return { redirect: { destination: '/chat', permanent: false } }
+  else return { props: {} }
 }
 
 export default Home
