@@ -1,0 +1,12 @@
+.chat_box {
+  background-color: transparent; 
+  border: 1px solid $light_color;
+  outline: none;
+  font-size: 1.3rem;
+  color: $light_color;
+  padding: 9px;
+  width: 100%;
+  resize: none;
+  height: min-content;
+  height: 42px;
+}

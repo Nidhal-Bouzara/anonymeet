@@ -1,22 +1,21 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession, GetSessionParams } from "next-auth/react";
-import { User } from '@prisma/client'
 import prisma from '@utils/prisma'
 import { handleError } from "@utils/api";
-import { Message } from "pages/chat";
-import { IncomingMessage } from "http";
+import { Message, User } from ".prisma/client";
 
 export const getMessagesFromDB = async (cursor: number | false = false) => {
   const messages = await prisma.message.findMany({
-    take: 25,
+    take: 100,
     skip: cursor ? 1 : 0,
     cursor: !cursor ? undefined : {
       id: cursor
-    }
+    },
+    include: { user: { select: { username: true } } }
   })
   return messages
 }
 
+export type GET_MESSAGE_RES = { messages: Message & Pick<User, 'username'>, cursor: number }
 const getMessages = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     let cursor: number | false
@@ -30,33 +29,24 @@ const getMessages = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
+export type POST_MESSAGE_RES = { message: Message & { user: { username: string } } }
 const upsertMessage = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
-    // !todo: Implement authentication
-    const session = {}
-    console.log('entered session: ', session);
-    if (session === null) throw new Error('ERROR: User not logged in.')
-    const user = await prisma.user.findUnique({ where: { username: (session.user! as User).username } })
-    if (!user) return new Error('ERROR: User does not exist')
-    const message = req.body as Message
-    if (message.user_id === user.id) return new Error('ERROR: User does not have permission')
-    // if message is a new message upsert where id == message_id will not match anything
-    // this creates a new message
-    let message_id: number = 0
-    if (message.id) message_id = message.id
-    const new_message = prisma.message.upsert({
-      where: {
-        id: message_id
+    // !todo: Actually create this route properly
+    // ! temporary route logic below, will be replaced
+    const user_id = req.query.params[0]
+    const message = await prisma.message.create({
+      data: {
+        message: req.body.message,
+        user: {
+          connect: {
+            id: Number(user_id)
+          }
+        }
       },
-      update: {
-        message: message.message
-      },
-      create: {
-        message: message.message,
-        user_id: (session.user as User).id
-      }
+      include: { user: { select: { username: true }}}
     })
-    return res.json({ message: new_message })
+    return res.json({ message })
   } catch (err) {
     return handleError(res, 422, (err as Error).message)
   }

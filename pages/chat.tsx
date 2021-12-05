@@ -1,46 +1,60 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import faker from 'faker'
 
 // styles
 import sheet from '@styles/pages/chat.module.scss'
 import { useForm } from 'react-hook-form'
-import { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next'
+import { GetServerSideProps, GetServerSidePropsContext, GetServerSidePropsResult, NextPage } from 'next'
 import Axios from 'axios'
 import { User } from '.prisma/client'
 import _ from 'lodash'
-import { getMessages, getMessagesFromDB } from '@controllers/MessageController'
+import { getMessages, getMessagesFromDB, POST_MESSAGE_RES } from '@controllers/MessageController'
+import { DateTime } from 'luxon'
+import { toast } from 'react-toastify'
+import { Message } from '@prisma/client'
 
-export type Message = { id: number, message: string, user_id: number, user: Omit<User, 'password'>, created_at: string, updated_at: string }
-type FormValues = Partial<Message>
+type MessageWithUser = Message & { user: Pick<User, 'username'> }
+type FormValues = Partial<MessageWithUser>
+
 interface Props {
-  messages: Message[]
+  messages: MessageWithUser[],
+  cursor?: number
 }
 
+const Chat: NextPage<Props> = ({ messages, cursor }) => {
+  const { register, reset, setValue, formState: { isSubmitting }, handleSubmit } = useForm<FormValues>({ defaultValues:{ message: '' } })
+  const [Messages, setMessages] = useState<MessageWithUser[]>([])
 
-
-const Chat: NextPage<Props> = ({ messages }) => {
-  const { register, formState: { isSubmitting }, handleSubmit } = useForm<FormValues>({ defaultValues:{ message: '' } })
   useEffect(() => {
-    Axios.post('api/message', { message: 'First message!' })
-  }, [])
+    setMessages(messages)
+  }, [messages])
 
-  const submitMessage = (values: FormValues) => {
+  const submitMessage = async (values: FormValues) => {
     if (values.message!.trim() === '') return
+    const message = ((await Axios.post('/api/message/1', values)).data as POST_MESSAGE_RES).message
+    setMessages([ ...Messages, message ])
+    reset()
   }
 
   return (
-    <main>
-      <ul className={sheet.chat_container}>
-        {
-          messages.map( message => (
-            <li key={message.id}>
-              <span><strong>{ message.user } </strong></span><span>{ message.message } - { message.index }</span>
-            </li>
-          ))
-        }
-      </ul>
+    <main className={sheet.container}>
+      <div className={sheet.chat_scroll_container}>
+        <ul className={sheet.chat_container}>
+          {
+            Messages.map( message => (
+              <li key={message.id}>
+                <span><strong>{ message.user.username }: </strong></span><span>{ message.message } - { message.id }</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
       <div>
-        <form ></form>
+        <form className={sheet.chat_form} onSubmit={ handleSubmit(submitMessage) }>
+          <textarea className={sheet.chat_box} onKeyPress={(e) => e.key === 'Enter' && handleSubmit(submitMessage)()} {...register('message')}/>
+          <button className={sheet.submit_message} type="button" onClick={() => { setValue('message', faker.hacker.phrase()) }}>Generate Hacker Text</button>
+          <button className={sheet.submit_message} type="submit">submit</button>
+        </form>
       </div>
     </main>
   )
@@ -50,7 +64,8 @@ export const getServerSideProps: GetServerSideProps<Props | {}> = async (ctx: Ge
   // !todo: Implement auth logic
   const session = {}
   if (session === null) return ({ redirect: { destination: '/', permanent: false } })
-  else return { props: { messages: await getMessagesFromDB() } }
+  const messages = (await getMessagesFromDB()).map(item => ({...item, created_at: DateTime.fromJSDate(item.created_at).toString(), updated_at: DateTime.fromJSDate(item.updated_at).toString()}))
+  return { props: { messages, cursor: 1 } }
 }
 
 export default Chat

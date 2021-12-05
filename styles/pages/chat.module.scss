@@ -1,0 +1,53 @@
+@import '@styles/variables.scss';
+@import '@styles/common/ChatBox.module.scss';
+
+$font_family: monospace;
+
+.container {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr 70px;
+  background-color: $base_color;
+  color: $light_color;
+  font-family: $font_family;
+  font-size: 1.4rem;
+}
+
+.chat_scroll_container {
+  display: flex;
+  overflow-y: auto;
+  flex-direction: column-reverse;
+}
+
+.chat_container {
+  padding: 1rem;
+  margin: 0;
+  list-style: none;
+}
+
+.chat_form {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+}
+
+.submit_message {
+  background-color: transparent;
+  border: 1px solid $light_color;
+  padding: 1rem;
+  height: 42px;
+  width: fit-content;
+  margin-left: 1rem;
+  white-space: nowrap;
+  color: $light_color;
+  font-family: $font_family;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all .05s ease;
+
+  &:hover {
+    background-color: $light_color;
+    color: black;
+    mix-blend-mode: screen;
+  }
+}
