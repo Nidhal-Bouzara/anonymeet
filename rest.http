@@ -1,1 +1,18 @@
-GET http://localhost:3000/api/chat
+POST http://localhost:3000/api/auth/signin
+
+{ "Content-Type": "application/json"}
+
+{
+  "username": "nidhal",
+  "password": "passwjord",
+  "csrfToken": "1b1a1a9dfd2ecea8fd90de7c51f8a9555d7c7848d2421a91c6997884c077c1fc"
+}
+
+###
+
+GET  http://localhost:3000/api/auth/csrf
+
+###
+GET  http://localhost:3000/api/message
+
+

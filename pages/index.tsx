@@ -7,13 +7,10 @@ import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup/dist/yup'
 
 // next imports
-import type { GetServerSideProps, GetServerSidePropsResult, NextPage } from 'next'
-import { getSession, signIn } from 'next-auth/react'
-import Router from 'next/router'
+import type { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next'
 
 // styles
 import sheet from '@styles/pages/index.module.scss'
-import { authOrRedirect } from 'utils/authenticate'
 import _ from 'lodash'
 
 const validationSchema = yup.object({
@@ -35,13 +32,7 @@ const Home: NextPage = () => {
   
   const handleFormSubmit = async (values: FormValues) => {
     try {
-      const res = (await signIn('credentials', { ...values, redirect: false })) as any
-      if (!res.ok) toast.error('ERROR: This user does not exist in our records.')
-      else {
-        toast.success('SUCCESS: Redirecting.')
-        setIsFormSubmitting(true)
-        Router.push('/chat')
-      }
+      // !todo: Implement auth logic
     } catch (e) {
       toast.error(`ERROR: Unexpected error occured, please try again.`)
     }
@@ -71,9 +62,10 @@ const Home: NextPage = () => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps<{}> = async (ctx) => {
-  const session = await getSession(ctx)
-  if (!_.isEmpty(session)) return { redirect: { destination: '/chat', permanent: false } }
+export const getServerSideProps: GetServerSideProps<{}> = async (ctx: GetServerSidePropsContext) => {
+  // !todo: Implement auth logic
+  const session = {}
+  if (session !== null) return { redirect: { destination: '/chat', permanent: false } }
   else return { props: {} }
 }
 

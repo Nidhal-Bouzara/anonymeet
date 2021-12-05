@@ -18,7 +18,8 @@
     "paths": {
       "@components/*": ["./components/*"],
       "@controllers/*": ["./controllers/*"],
-      "@styles/*": ["./styles/*"]
+      "@styles/*": ["./styles/*"],
+      "@utils/*": ["./utils/*"]
 
     }
   },
