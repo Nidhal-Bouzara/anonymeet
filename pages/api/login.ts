@@ -1,3 +1,3 @@
-import { login } from '@controllers/LoginController'
+import { signIn } from '@controllers/AuthController'
 
-export default login
+export default signIn

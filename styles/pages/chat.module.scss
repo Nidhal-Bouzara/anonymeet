@@ -20,9 +20,32 @@ $font_family: monospace;
 }
 
 .chat_container {
-  padding: 1rem;
+  padding: 1rem 1rem 0;
   margin: 0;
   list-style: none;
+}
+
+.message {
+  display: flex;
+  justify-content: space-between;
+  &:hover {
+    background-color: $off_light_color;
+    color: $off_base_color;
+    & > .message_info {
+      display: block;
+    }
+
+    & > .message_content {
+      width: 87%;
+    }
+  }
+}
+
+.message_info {
+  display: none;
+  width: fit-content;
+  white-space: nowrap;
+  color: $light_color;
 }
 
 .chat_form {

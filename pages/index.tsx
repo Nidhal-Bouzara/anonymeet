@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
+import Axios from 'axios'
+import router from 'next/router'
 
 // form imports
 import * as yup from 'yup'
@@ -12,6 +14,7 @@ import type { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'ne
 // styles
 import sheet from '@styles/pages/index.module.scss'
 import _ from 'lodash'
+import { getSession } from '@utils/Auth/simpleAuth'
 
 const validationSchema = yup.object({
   username: yup.string().required("This field is required"),
@@ -32,9 +35,11 @@ const Home: NextPage = () => {
   
   const handleFormSubmit = async (values: FormValues) => {
     try {
-      // !todo: Implement auth logic
+      const res = await Axios.post('api/login', { ...values, redirectUrl: '/chat' })
+      toast.success('SUCCESS: Redirecting...')
+      if ( res.status === 200 ) router.push('/chat')
     } catch (e) {
-      toast.error(`ERROR: Unexpected error occured, please try again.`)
+      toast.error(`ERROR: Authentication failure, please try again` + (e as any))
     }
   }
   
@@ -63,10 +68,9 @@ const Home: NextPage = () => {
 }
 
 export const getServerSideProps: GetServerSideProps<{}> = async (ctx: GetServerSidePropsContext) => {
-  // !todo: Implement auth logic
-  const session = {}
-  if (session !== null) return { redirect: { destination: '/chat', permanent: false } }
-  else return { props: {} }
+  const user = await getSession(ctx.req, ctx.res)
+  if (!user) return { props: {} }
+  else return { redirect: { destination: '/chat', permanent: false } }
 }
 
 export default Home
