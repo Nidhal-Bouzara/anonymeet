@@ -5,7 +5,8 @@ import { Message, User } from ".prisma/client";
 import { reverse } from "lodash";
 import { getSession } from "@utils/Auth/simpleAuth";
 
-export const getMessagesFromDB = async (cursor: number | false = false) => {
+export type MessageWithUser = Message & { user: { username: string } }
+export const getMessagesFromDB = async (cursor: number | false = false): Promise<MessageWithUser[]> => {
   const messages = reverse(await prisma.message.findMany({
     take: 100,
     skip: cursor ? 1 : 0,
@@ -18,15 +19,14 @@ export const getMessagesFromDB = async (cursor: number | false = false) => {
   return messages
 }
 
-export type GET_MESSAGE_RES = { messages: Message & Pick<User, 'username'>, cursor: number }
+export type GET_MESSAGE_RES = { messages: MessageWithUser[], new_cursor: number }
 const getMessages = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     let cursor: number | false
-    if ( req.query.params ) cursor = Number(req.query.params[0])
+    if ( req.query.params ) cursor = Number(req.query.params[0]); 
     else cursor = false
     const messages = await getMessagesFromDB(cursor)
-    return res.json({ messages, cursor })
-
+    return res.json({ messages, new_cursor: messages[0].id })
   } catch (err) {
     return handleError(res, 422, (err as Error).message)
   }
