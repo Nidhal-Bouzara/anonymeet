@@ -40,7 +40,7 @@ export const getSession = async (req: NextApiRequest | IncomingMessage & { cooki
  * @param res NextApiResponse
  * @returns void
  */
-export const signIn = async (req: NextApiRequest, res: NextApiResponse) => {
+export const signIn = async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
   try {
     const { username, password } = req.body
     if (!username || !password) throw new Error('No credentials included.')

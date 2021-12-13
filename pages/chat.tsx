@@ -36,7 +36,7 @@ const Chat: NextPage<Props> = ({ user, messages, cursor }) => {
 
   useEffect(() => {
     if (!GettingMessages) return
-    if (Cursor <= 1) {setLoadedAllMessages(true); return;}
+    if (Cursor <= 1) return
     const ScrollContainer = document.getElementById("messages_scroller") as HTMLDivElement
     const current_scroll = Number((ScrollContainer).scrollTop)
     Axios.get(`/api/message/${Cursor}`)
@@ -45,12 +45,13 @@ const Chat: NextPage<Props> = ({ user, messages, cursor }) => {
         setMessages([...new_messages, ...Messages])
         setCursor(new_cursor)
         setGettingMessages(false)
+        if (new_cursor <= 1) setLoadedAllMessages(true)
         ScrollContainer.scrollTo({ top: current_scroll, behavior: 'smooth' })
       })
       .catch(err => {
         toast.error('ERROR: Could not load messages.')
       })
-  }, [GettingMessages]) // ignore the dependency array warning
+  }, [ GettingMessages ]) // ignore the dependency array warning, it's intentional
 
   const submitMessage = async (values: FormValues) => {
     if (values.message!.trim() === '') return
