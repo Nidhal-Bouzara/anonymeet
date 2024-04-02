@@ -6,7 +6,7 @@ import router from 'next/router'
 // form imports
 import * as yup from 'yup'
 import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup'
+// import { yupResolver } from '@hookform/resolvers/yup'
 
 // next imports
 import type { GetServerSideProps, GetServerSidePropsContext, NextPage } from 'next'
@@ -23,7 +23,7 @@ const validationSchema = yup.object({
 }).required()
 
 const Home: NextPage = () => {
-  const {register, formState: { errors, isSubmitting }, handleSubmit} = useForm<SIGNIN_FORM_SCHEMA>({ resolver: yupResolver(validationSchema) })
+  const {register, formState: { errors, isSubmitting }, handleSubmit} = useForm<SIGNIN_FORM_SCHEMA>()
   const [IsFormSubmitting, setIsFormSubmitting] = useState<boolean>(false)
   useEffect(() => {
     if (isSubmitting !== IsFormSubmitting) setIsFormSubmitting(isSubmitting)

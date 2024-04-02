@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup/dist/yup'
+// import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 
 // styles
@@ -18,7 +18,7 @@ const validationSchema = yup.object({
 
 const Register: NextPage = () => {
   const [FormIsSubmitting, setFormIsSubmitting] = useState<boolean>(false)
-  const { register, formState: { isSubmitting, errors }, setError, handleSubmit } = useForm<REGISTRATION_FORM_SCHEMA>({ resolver: yupResolver(validationSchema) })
+  const { register, formState: { isSubmitting, errors }, setError, handleSubmit } = useForm<REGISTRATION_FORM_SCHEMA>()
 
   useEffect(() => {
     if ( isSubmitting !== FormIsSubmitting ) setFormIsSubmitting(isSubmitting)
